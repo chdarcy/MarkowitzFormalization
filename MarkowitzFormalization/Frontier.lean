@@ -408,3 +408,14 @@ theorem frontierPortfolio_feasible_of_market (covM : Matrix n n ℝ)
     frontierPortfolio n covM μ m ∈ feasibleSet n μ m :=
   frontierPortfolio_feasible n covM μ m market.posDef
     (frontierD_pos n covM μ market).ne'
+
+/-! ### Optimality helpers -/
+
+/-- The covariance matrix applied to the frontier portfolio: `Σ w★ = λ·μ + γ·1`,
+since `Σ (Σ⁻¹ x) = x`. -/
+theorem mulVec_frontierPortfolio (covM : Matrix n n ℝ) (μ : portfolioWeights n) (m : ℝ)
+    (hcov : covM.PosDef) :
+    covM.mulVec (frontierPortfolio n covM μ m)
+      = frontierLambda n covM μ m • μ + frontierGamma n covM μ m • onesVec n := by
+  rw [frontierPortfolio_def, Matrix.mulVec_add, Matrix.mulVec_smul, Matrix.mulVec_smul,
+    posDef_mulVec_inv_mulVec n hcov, posDef_mulVec_inv_mulVec n hcov]
