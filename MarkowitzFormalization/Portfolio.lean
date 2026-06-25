@@ -71,6 +71,19 @@ theorem portfolioVariance_nonneg
   exact h
 
 omit [DecidableEq n] in
+/-- Variance is definite under positive definiteness: `wᵀΣw = 0` forces `w = 0`.
+The strict positivity `0 < wᵀΣw` for `w ≠ 0` contradicts the vanishing variance. -/
+theorem portfolioVariance_eq_zero_of_posDef
+    (covM : Matrix n n ℝ) (hcov : covM.PosDef) (w : portfolioWeights n)
+    (hw : portfolioVariance n covM w = 0) :
+    w = 0 := by
+  by_contra hne
+  have hpos := hcov.dotProduct_mulVec_pos hne
+  simp only [star_trivial] at hpos
+  rw [← portfolioVariance, hw] at hpos
+  exact lt_irrefl 0 hpos
+
+omit [DecidableEq n] in
 theorem portfolioRisk_nonneg
     (covM : Matrix n n ℝ)
     (w : portfolioWeights n) :
