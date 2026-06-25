@@ -206,3 +206,28 @@ theorem rfFrontierPortfolio_cross_zero
   have hz' : z ⬝ᵥ excessReturn n μ rf = 0 := hz
   rw [mulVec_rfFrontierPortfolio n covM μ rf m hcov, dotProduct_comm z,
     smul_dotProduct, dotProduct_comm (excessReturn n μ rf) z, hz', smul_zero]
+
+/-- **Feasible deviation has zero excess return**: if `w` attains total return `m`,
+then so does the frontier portfolio `w★`, so their difference `w - w★` carries zero
+expected excess return. This is the single linear condition the optimality argument
+feeds into `rfFrontierPortfolio_cross_zero`. -/
+theorem rf_feasible_deviation_expectedReturn_zero
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf m : ℝ)
+    (hcov : covM.PosDef)
+    (he : excessReturn n μ rf ≠ 0)
+    (w : portfolioWeights n)
+    (hw : totalExpectedReturn n μ rf w = m) :
+    expectedReturn n (excessReturn n μ rf)
+      (w - rfFrontierPortfolio n covM μ rf m) = 0 := by
+  have hwexp : rf + expectedReturn n (excessReturn n μ rf) w = m := by
+    rw [← totalExpectedReturn_def]; exact hw
+  have hstar : rf + expectedReturn n (excessReturn n μ rf)
+      (rfFrontierPortfolio n covM μ rf m) = m := by
+    rw [← totalExpectedReturn_def]
+    exact rfFrontierPortfolio_totalExpectedReturn n covM μ rf m hcov he
+  have hsplit : rfFrontierPortfolio n covM μ rf m
+      + (w - rfFrontierPortfolio n covM μ rf m) = w := by abel
+  have hadd := expectedReturn_add n (excessReturn n μ rf)
+    (rfFrontierPortfolio n covM μ rf m) (w - rfFrontierPortfolio n covM μ rf m)
+  rw [hsplit] at hadd
+  linarith
