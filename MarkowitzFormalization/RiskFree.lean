@@ -99,3 +99,18 @@ theorem tangencyPortfolio_def (covM : Matrix n n ℝ) (μ : portfolioWeights n) 
     tangencyPortfolio n covM μ rf
       = (1 / tangencyDenominator n covM μ rf) • covM⁻¹.mulVec (excessReturn n μ rf) :=
   rfl
+
+/-!
+## Squared Sharpe ratio as a variance
+-/
+
+/-- The squared Sharpe ratio `eᵀ Σ⁻¹ e` is the risky variance of the vector
+`Σ⁻¹ e`: since `Σ(Σ⁻¹e) = e`, we have `eᵀΣ⁻¹e = (Σ⁻¹e)ᵀ Σ (Σ⁻¹e)`. -/
+theorem sharpeSquared_eq_portfolioVariance
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf : ℝ)
+    (hcov : covM.PosDef) :
+    sharpeSquared n covM μ rf
+      = portfolioVariance n covM (covM⁻¹.mulVec (excessReturn n μ rf)) := by
+  unfold sharpeSquared portfolioVariance
+  rw [posDef_mulVec_inv_mulVec n hcov (excessReturn n μ rf)]
+  exact dotProduct_comm _ _
