@@ -53,13 +53,13 @@ noncomputable def rfFrontierPortfolio
   ((m - rf) / sharpeSquared n covM μ rf)
     • covM⁻¹.mulVec (excessReturn n μ rf)
 
-/-- The **tangency normaliser** `1ᵀ Σ⁻¹ e = A - C·rf`. -/
+/-- The **tangency normaliser** `1ᵀ Σ⁻¹ e = A - rf*C`. -/
 noncomputable def tangencyDenominator
     (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf : ℝ) : ℝ :=
   onesVec n ⬝ᵥ covM⁻¹.mulVec (excessReturn n μ rf)
 
-/-- The **tangency portfolio**: the fully invested risky portfolio on the CML,
-`w_T = Σ⁻¹ e / (1ᵀ Σ⁻¹ e)`. -/
+/-- The **tangency portfolio** on the CML, `w_T = Σ⁻¹ e / (1ᵀ Σ⁻¹ e)`. It is fully
+invested (`∑ᵢ (w_T)ᵢ = 1`) precisely when the denominator `1ᵀ Σ⁻¹ e ≠ 0`. -/
 noncomputable def tangencyPortfolio
     (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf : ℝ) :
     portfolioWeights n :=
@@ -379,6 +379,24 @@ theorem rfFrontierPortfolio_one_fund
   rw [smul_smul]
   congr 1
   field_simp
+
+/-- **Cash leg of one-fund separation**: the implicit risk-free weight of the
+risk-free frontier portfolio is `w₀ = 1 - θ`, where `θ = (m - rf)·D / S` is exactly
+the tangency coefficient from `rfFrontierPortfolio_one_fund`. Together with that
+theorem this gives the pair form `(w₀, w) = (1 - θ, θ·w_T)`. Unconditional: it uses
+`1ᵀ w★ = ((m - rf)/S)·(1ᵀΣ⁻¹e) = ((m - rf)/S)·D` directly, with no `D ≠ 0`. -/
+theorem rfFrontierPortfolio_riskFreeWeight
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf m : ℝ) :
+    riskFreeWeight n (rfFrontierPortfolio n covM μ rf m)
+      =
+    1 - (m - rf) * tangencyDenominator n covM μ rf / sharpeSquared n covM μ rf := by
+  have hD' : expectedReturn n (onesVec n)
+      (covM⁻¹.mulVec (excessReturn n μ rf)) = tangencyDenominator n covM μ rf := by
+    unfold expectedReturn tangencyDenominator
+    exact dotProduct_comm _ _
+  unfold riskFreeWeight rfFrontierPortfolio
+  rw [← expectedReturn_onesVec_eq_sum, expectedReturn_smul, hD']
+  ring
 
 /-- **Total expected return of the tangency portfolio**: `rf + S/D`. Adding the
 risk-free base rate to the expected excess return `eᵀw_T = S/D` from
