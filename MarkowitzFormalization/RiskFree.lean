@@ -343,3 +343,12 @@ theorem tangencyPortfolio_budget
   unfold tangencyPortfolio
   rw [expectedReturn_smul, hD']
   field_simp
+
+omit [DecidableEq n] in
+/-- **Total risky weight as an expected return**: `1ᵀ w = ∑ i, w i`. Reading the
+expected return against the all-ones vector recovers the total risky weight, the
+quantity the implicit cash weight `riskFreeWeight` completes to `1`. -/
+theorem expectedReturn_onesVec_eq_sum (w : portfolioWeights n) :
+    expectedReturn n (onesVec n) w = ∑ i, w i := by
+  unfold expectedReturn onesVec
+  simp
