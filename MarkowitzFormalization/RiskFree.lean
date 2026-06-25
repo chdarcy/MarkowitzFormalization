@@ -404,3 +404,16 @@ theorem capitalMarketLine_squared
   have hS : sharpeSquared n covM μ rf ≠ 0 := (sharpeSquared_pos n covM μ rf hcov he).ne'
   rw [rfFrontierPortfolio_variance n covM μ rf m hcov he]
   field_simp
+
+/-- **Image of the tangency portfolio under `Σ`**: since `w_T = (1/D)·Σ⁻¹e`, we have
+`Σ w_T = (1/D)·e`. The shared keystone (analogous to `mulVec_rfFrontierPortfolio`)
+for the security-market-line and Sharpe-maximisation arguments. -/
+theorem mulVec_tangencyPortfolio
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf : ℝ)
+    (hcov : covM.PosDef) :
+    covM.mulVec (tangencyPortfolio n covM μ rf)
+      =
+    (1 / tangencyDenominator n covM μ rf)
+      • excessReturn n μ rf := by
+  unfold tangencyPortfolio
+  rw [Matrix.mulVec_smul, posDef_mulVec_inv_mulVec n hcov (excessReturn n μ rf)]
