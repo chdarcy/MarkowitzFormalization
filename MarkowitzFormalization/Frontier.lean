@@ -434,3 +434,20 @@ theorem portfolioVariance_add_of_cross_zero
   rw [Matrix.mulVec_add, add_dotProduct, dotProduct_add, dotProduct_add,
     cov_dotProduct_symm n covM hcov w z, hcross]
   ring
+
+/-- A deviation `z` with zero expected return and zero budget has vanishing `Σ`-cross
+term against the frontier portfolio: `z ⬝ᵥ Σ w★ = λ·(μ⬝ᵥz) + γ·(1⬝ᵥz) = 0`. -/
+theorem frontierPortfolio_cross_zero
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (m : ℝ)
+    (z : portfolioWeights n) (hcov : covM.PosDef)
+    (hzret : expectedReturn n μ z = 0)
+    (hzbud : ∑ i, z i = 0) :
+    z ⬝ᵥ covM.mulVec (frontierPortfolio n covM μ m) = 0 := by
+  rw [mulVec_frontierPortfolio n covM μ m hcov, dotProduct_comm, add_dotProduct,
+    smul_dotProduct, smul_dotProduct, smul_eq_mul, smul_eq_mul]
+  have h1 : μ ⬝ᵥ z = 0 := by rw [dotProduct_comm]; exact hzret
+  have h2 : onesVec n ⬝ᵥ z = 0 := by
+    simp only [dotProduct, onesVec, one_mul]
+    exact hzbud
+  rw [h1, h2]
+  ring
