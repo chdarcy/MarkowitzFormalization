@@ -795,3 +795,17 @@ theorem frontierPortfolio_dominated_of_lt_gmvp
   refine ⟨?_, le_of_eq hvar, ?_⟩
   · rw [hret, hret']; linarith
   · left; rw [hret, hret']; linarith
+
+/-- **Frontier portfolios below the GMVP return are not efficient**: the
+vertex-reflected portfolio is a budget-feasible witness that dominates `w★(m)`. -/
+theorem frontierPortfolio_not_efficient_of_lt_gmvp
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (m : ℝ)
+    (market : NonDegenerateMarket n μ covM) [Nonempty n]
+    (hm : m < frontierA n covM μ / frontierC n covM) :
+    ¬ efficientPortfolio n μ covM (frontierPortfolio n covM μ m) := by
+  rintro ⟨_, hnot⟩
+  exact hnot ⟨frontierPortfolio n covM μ
+      (2 * (frontierA n covM μ / frontierC n covM) - m),
+    frontierPortfolio_budget_of_market n covM μ
+      (2 * (frontierA n covM μ / frontierC n covM) - m) market,
+    frontierPortfolio_dominated_of_lt_gmvp n covM μ m market hm⟩
