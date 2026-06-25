@@ -114,3 +114,24 @@ theorem sharpeSquared_eq_portfolioVariance
   unfold sharpeSquared portfolioVariance
   rw [posDef_mulVec_inv_mulVec n hcov (excessReturn n μ rf)]
   exact dotProduct_comm _ _
+
+/-- **Positivity of the squared Sharpe ratio**: when the excess-return vector is
+nonzero (`μ ≠ rf·1`), `eᵀΣ⁻¹e > 0`. The single denominator the risk-free frontier
+divides by is therefore strictly positive. -/
+theorem sharpeSquared_pos
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf : ℝ)
+    (hcov : covM.PosDef)
+    (he : excessReturn n μ rf ≠ 0) :
+    0 < sharpeSquared n covM μ rf := by
+  set y := covM⁻¹.mulVec (excessReturn n μ rf) with hy
+  have hkey : covM.mulVec y = excessReturn n μ rf :=
+    posDef_mulVec_inv_mulVec n hcov (excessReturn n μ rf)
+  have hyne : y ≠ 0 := by
+    intro hzero
+    apply he
+    rw [← hkey, hzero, Matrix.mulVec_zero]
+  rw [sharpeSquared_eq_portfolioVariance n covM μ rf hcov, ← hy]
+  unfold portfolioVariance
+  have hpos := hcov.dotProduct_mulVec_pos hyne
+  simp only [star_trivial] at hpos
+  exact hpos
