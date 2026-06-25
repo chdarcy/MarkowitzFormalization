@@ -153,3 +153,29 @@ theorem rfFrontierPortfolio_totalExpectedReturn
   rw [expectedReturn_smul, hexp]
   field_simp
   ring
+
+/-- **Variance closed form** (the Capital Market Line): the risk-free frontier
+portfolio for target `m` has variance `(m - rf)² / eᵀΣ⁻¹e`. Since `w★ = a • Σ⁻¹e`
+with `a = (m-rf)/S`, the quadratic form scales as `a² · S = (m-rf)²/S`. -/
+theorem rfFrontierPortfolio_variance
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf m : ℝ)
+    (hcov : covM.PosDef)
+    (he : excessReturn n μ rf ≠ 0) :
+    riskFreeVariance n covM (rfFrontierPortfolio n covM μ rf m)
+      = (m - rf) ^ 2 / sharpeSquared n covM μ rf := by
+  have hS : sharpeSquared n covM μ rf ≠ 0 := (sharpeSquared_pos n covM μ rf hcov he).ne'
+  unfold riskFreeVariance rfFrontierPortfolio
+  set a := (m - rf) / sharpeSquared n covM μ rf with ha
+  set y := covM⁻¹.mulVec (excessReturn n μ rf) with hy
+  have hvar : portfolioVariance n covM (a • y) = a ^ 2 * portfolioVariance n covM y := by
+    unfold portfolioVariance
+    rw [Matrix.mulVec_smul, smul_dotProduct,
+      dotProduct_comm y (a • covM.mulVec y), smul_dotProduct,
+      dotProduct_comm (covM.mulVec y) y]
+    simp only [smul_eq_mul]
+    ring
+  have hSeq : portfolioVariance n covM y = sharpeSquared n covM μ rf := by
+    rw [hy]
+    exact (sharpeSquared_eq_portfolioVariance n covM μ rf hcov).symm
+  rw [hvar, hSeq, ha]
+  field_simp
