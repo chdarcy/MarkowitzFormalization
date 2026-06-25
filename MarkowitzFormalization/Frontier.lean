@@ -848,3 +848,36 @@ theorem frontierPortfolio_variance_strictMono_ge
   rw [frontierPortfolio_variance_completed_square n covM μ m₁ market,
     frontierPortfolio_variance_completed_square n covM μ m₂ market]
   linarith [mul_lt_mul_of_pos_left hsq hCD]
+
+/-- **Frontier portfolios at or above the GMVP return are efficient**: no
+budget-feasible portfolio dominates `w★(m)` when `m ≥ A/C`. A dominator's own return
+`m'` would satisfy `m ≤ m'`, but the lower envelope and strict upper-branch
+monotonicity then force `m' = m` and equal variance, ruling out both strict branches
+of domination. -/
+theorem frontierPortfolio_efficient_of_ge_gmvp
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (m : ℝ)
+    (market : NonDegenerateMarket n μ covM) [Nonempty n]
+    (hm : frontierA n covM μ / frontierC n covM ≤ m) :
+    efficientPortfolio n μ covM (frontierPortfolio n covM μ m) := by
+  refine ⟨frontierPortfolio_budget_of_market n covM μ m market, ?_⟩
+  rintro ⟨w', hw'budget, hret_le, hvar_le, hstrict⟩
+  have hretw : expectedReturn n μ (frontierPortfolio n covM μ m) = m :=
+    frontierPortfolio_expectedReturn_of_market n covM μ m market
+  have hmm' : m ≤ expectedReturn n μ w' := by rw [hretw] at hret_le; exact hret_le
+  have henv : portfolioVariance n covM
+      (frontierPortfolio n covM μ (expectedReturn n μ w'))
+        ≤ portfolioVariance n covM w' :=
+    budget_variance_ge_frontier_at_return n covM μ market w' hw'budget
+  have hnlt : ¬ m < expectedReturn n μ w' := by
+    intro hmm
+    have hmono := frontierPortfolio_variance_strictMono_ge n covM μ m
+      (expectedReturn n μ w') market hm hmm
+    linarith
+  have heqm : expectedReturn n μ w' = m := le_antisymm (not_lt.mp hnlt) hmm'
+  rw [heqm] at henv
+  have hvar_eq : portfolioVariance n covM w'
+      = portfolioVariance n covM (frontierPortfolio n covM μ m) :=
+    le_antisymm hvar_le henv
+  rcases hstrict with hs | hs
+  · rw [hretw, heqm] at hs; exact lt_irrefl m hs
+  · rw [hvar_eq] at hs; exact lt_irrefl _ hs
