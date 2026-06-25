@@ -627,3 +627,19 @@ theorem frontierPortfolio_gmvp_variance
   rw [frontierPortfolio_variance_completed_square n covM μ
     (frontierA n covM μ / frontierC n covM) market]
   ring
+
+/-- **Global minimality of the GMVP** (`cor:gmvp`): every frontier portfolio has variance
+at least `1/C`, the variance of the GMVP. The completed-square form makes this immediate
+since `(C/D)·(m − A/C)² ≥ 0`. -/
+theorem frontierPortfolio_variance_ge_gmvp
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (m : ℝ)
+    (market : NonDegenerateMarket n μ covM) [Nonempty n] :
+    1 / frontierC n covM
+      ≤ portfolioVariance n covM (frontierPortfolio n covM μ m) := by
+  rw [frontierPortfolio_variance_completed_square n covM μ m market]
+  have hC := frontierC_pos n covM market.posDef
+  have hD := frontierD_pos n covM μ market
+  have hterm : 0 ≤ (frontierC n covM / frontierD n covM μ)
+      * (m - frontierA n covM μ / frontierC n covM) ^ 2 :=
+    mul_nonneg (div_pos hC hD).le (sq_nonneg _)
+  linarith
