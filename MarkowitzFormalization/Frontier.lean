@@ -515,3 +515,26 @@ theorem frontierPortfolio_optimal_of_market
   simp only [markowitzObjective_def]
   rw [hvar]
   nlinarith [hznn]
+
+/-! ### Frontier variance equation -/
+
+/-- The optimal variance equals the affine expression `λ·m + γ` in the multipliers.
+This is the key step `σ²(m) = w★ᵀ(λμ + γ1) = λ·(w★ᵀμ) + γ·(w★ᵀ1) = λ·m + γ`,
+using that `w★` attains target return `m` and is fully invested. -/
+theorem frontierPortfolio_variance_eq_lambda_gamma
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (m : ℝ)
+    (hcov : covM.PosDef) (hD : frontierD n covM μ ≠ 0) :
+    portfolioVariance n covM (frontierPortfolio n covM μ m)
+      = frontierLambda n covM μ m * m + frontierGamma n covM μ m := by
+  have hmu : μ ⬝ᵥ frontierPortfolio n covM μ m = m := by
+    rw [dotProduct_comm]
+    exact frontierPortfolio_expectedReturn n covM μ m hcov hD
+  have hone : onesVec n ⬝ᵥ frontierPortfolio n covM μ m = 1 := by
+    have hb : ∑ i, frontierPortfolio n covM μ m i = 1 :=
+      frontierPortfolio_budget n covM μ m hD
+    simp only [dotProduct, onesVec, one_mul]
+    exact hb
+  unfold portfolioVariance
+  rw [mulVec_frontierPortfolio n covM μ m hcov, dotProduct_comm, add_dotProduct,
+    smul_dotProduct, smul_dotProduct, smul_eq_mul, smul_eq_mul, hmu, hone]
+  ring
