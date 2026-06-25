@@ -97,6 +97,17 @@ theorem dotProduct_covInv_symm {covM : Matrix n n ℝ} (hcov : covM.PosDef)
   rw [Matrix.dotProduct_mulVec, ← Matrix.mulVec_transpose, covInv_transpose n hcov,
     dotProduct_comm]
 
+omit [DecidableEq n] in
+/-- Symmetry of the `Σ`-bilinear form: `xᵀ Σ y = yᵀ Σ x` (for symmetric, hence positive
+definite, `Σ`). -/
+theorem cov_dotProduct_symm (covM : Matrix n n ℝ) (hcov : covM.PosDef)
+    (x y : portfolioWeights n) :
+    x ⬝ᵥ covM.mulVec y = y ⬝ᵥ covM.mulVec x := by
+  have hsymm : covMᵀ = covM := by
+    rw [← Matrix.conjTranspose_eq_transpose_of_trivial]
+    exact hcov.1.eq
+  rw [Matrix.dotProduct_mulVec, ← Matrix.mulVec_transpose, hsymm, dotProduct_comm]
+
 /-!
 ## The `Σ⁻¹` bilinear form
 
