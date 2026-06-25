@@ -135,3 +135,21 @@ theorem sharpeSquared_pos
   have hpos := hcov.dotProduct_mulVec_pos hyne
   simp only [star_trivial] at hpos
   exact hpos
+
+/-- **Constraint satisfaction**: the risk-free frontier portfolio attains the target
+total return `m`. Its expected excess return is `((m - rf)/eᵀΣ⁻¹e)·eᵀΣ⁻¹e = m - rf`,
+so the total return is `rf + (m - rf) = m`. -/
+theorem rfFrontierPortfolio_totalExpectedReturn
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf m : ℝ)
+    (hcov : covM.PosDef)
+    (he : excessReturn n μ rf ≠ 0) :
+    totalExpectedReturn n μ rf (rfFrontierPortfolio n covM μ rf m) = m := by
+  have hS : sharpeSquared n covM μ rf ≠ 0 := (sharpeSquared_pos n covM μ rf hcov he).ne'
+  have hexp : expectedReturn n (excessReturn n μ rf) (covM⁻¹.mulVec (excessReturn n μ rf))
+      = sharpeSquared n covM μ rf := by
+    unfold expectedReturn sharpeSquared
+    exact dotProduct_comm _ _
+  unfold totalExpectedReturn rfFrontierPortfolio
+  rw [expectedReturn_smul, hexp]
+  field_simp
+  ring
