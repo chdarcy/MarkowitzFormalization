@@ -352,3 +352,14 @@ theorem expectedReturn_onesVec_eq_sum (w : portfolioWeights n) :
     expectedReturn n (onesVec n) w = ∑ i, w i := by
   unfold expectedReturn onesVec
   simp
+
+/-- **Tangency portfolio holds no cash**: the implicit risk-free weight of the
+tangency portfolio is `0` (it is fully invested in risky assets). Immediate from
+`riskFreeWeight = 1 - ∑ wᵢ` and the budget normalisation `∑ wᵢ = 1`. -/
+theorem tangencyPortfolio_riskFreeWeight_zero
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf : ℝ)
+    (hD : tangencyDenominator n covM μ rf ≠ 0) :
+    riskFreeWeight n (tangencyPortfolio n covM μ rf) = 0 := by
+  unfold riskFreeWeight
+  rw [← expectedReturn_onesVec_eq_sum, tangencyPortfolio_budget n covM μ rf hD]
+  ring
