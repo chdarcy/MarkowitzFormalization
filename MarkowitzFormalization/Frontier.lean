@@ -615,3 +615,15 @@ theorem frontierPortfolio_gmvp_weights
   simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul]
   field_simp
   ring
+
+/-- **GMVP variance** (`cor:gmvp`): at the vertex return `m = A/C` the squared term in
+the completed-square form vanishes, so the minimal variance is `σ²_g = 1/C`. -/
+theorem frontierPortfolio_gmvp_variance
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n)
+    (market : NonDegenerateMarket n μ covM) [Nonempty n] :
+    portfolioVariance n covM
+      (frontierPortfolio n covM μ (frontierA n covM μ / frontierC n covM))
+      = 1 / frontierC n covM := by
+  rw [frontierPortfolio_variance_completed_square n covM μ
+    (frontierA n covM μ / frontierC n covM) market]
+  ring
