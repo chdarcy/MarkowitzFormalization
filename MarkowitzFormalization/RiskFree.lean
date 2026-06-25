@@ -379,3 +379,14 @@ theorem rfFrontierPortfolio_one_fund
   rw [smul_smul]
   congr 1
   field_simp
+
+/-- **Total expected return of the tangency portfolio**: `rf + S/D`. Adding the
+risk-free base rate to the expected excess return `eᵀw_T = S/D` from
+`tangencyPortfolio_expectedExcessReturn`. -/
+theorem tangencyPortfolio_totalExpectedReturn
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf : ℝ) :
+    totalExpectedReturn n μ rf (tangencyPortfolio n covM μ rf)
+      =
+    rf + sharpeSquared n covM μ rf / tangencyDenominator n covM μ rf := by
+  unfold totalExpectedReturn
+  rw [tangencyPortfolio_expectedExcessReturn]
