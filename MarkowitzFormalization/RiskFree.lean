@@ -179,3 +179,17 @@ theorem rfFrontierPortfolio_variance
     exact (sharpeSquared_eq_portfolioVariance n covM μ rf hcov).symm
   rw [hvar, hSeq, ha]
   field_simp
+
+/-!
+## Optimality of the risk-free frontier portfolio
+-/
+
+/-- **Image under `Σ`**: since `w★ = a • Σ⁻¹e`, we have `Σ w★ = a • e`. This is the
+keystone for the cross-term and optimality arguments. -/
+theorem mulVec_rfFrontierPortfolio
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf m : ℝ)
+    (hcov : covM.PosDef) :
+    covM.mulVec (rfFrontierPortfolio n covM μ rf m)
+      = ((m - rf) / sharpeSquared n covM μ rf) • excessReturn n μ rf := by
+  unfold rfFrontierPortfolio
+  rw [Matrix.mulVec_smul, posDef_mulVec_inv_mulVec n hcov (excessReturn n μ rf)]
