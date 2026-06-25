@@ -311,3 +311,20 @@ theorem tangencyDenominator_eq_frontierA_sub_rf_frontierC
   rw [excessReturn_eq_sub_smul_ones, Matrix.mulVec_sub, Matrix.mulVec_smul, dotProduct_sub,
     dotProduct_comm (onesVec n) (rf • covM⁻¹.mulVec (onesVec n)), smul_dotProduct,
     dotProduct_comm (covM⁻¹.mulVec (onesVec n)) (onesVec n), smul_eq_mul]
+
+/-- **Expected excess return of the tangency portfolio**: `eᵀ w_T = S / (1ᵀΣ⁻¹e)`.
+Since `w_T = (1/D)·Σ⁻¹e` with `D = 1ᵀΣ⁻¹e`, its expected excess return is
+`(1/D)·(eᵀΣ⁻¹e) = S/D`. This holds unconditionally — if `D = 0` both sides are `0`. -/
+theorem tangencyPortfolio_expectedExcessReturn
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf : ℝ) :
+    expectedReturn n (excessReturn n μ rf)
+      (tangencyPortfolio n covM μ rf)
+      =
+    sharpeSquared n covM μ rf / tangencyDenominator n covM μ rf := by
+  have hexp : expectedReturn n (excessReturn n μ rf)
+      (covM⁻¹.mulVec (excessReturn n μ rf)) = sharpeSquared n covM μ rf := by
+    unfold expectedReturn sharpeSquared
+    exact dotProduct_comm _ _
+  unfold tangencyPortfolio
+  rw [expectedReturn_smul, hexp]
+  ring
