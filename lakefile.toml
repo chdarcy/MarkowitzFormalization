@@ -7,6 +7,7 @@ defaultTargets = ["MarkowitzFormalization"]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`
 relaxedAutoImplicit = false
 weak.linter.mathlibStandardSet = true
+weak.linter.style.header = false # project is not part of mathlib; skip the mandatory-header check
 maxSynthPendingDepth = 3
 
 [[require]]
