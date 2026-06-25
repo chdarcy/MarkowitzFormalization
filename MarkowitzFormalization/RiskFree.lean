@@ -231,3 +231,29 @@ theorem rf_feasible_deviation_expectedReturn_zero
     (rfFrontierPortfolio n covM μ rf m) (w - rfFrontierPortfolio n covM μ rf m)
   rw [hsplit] at hadd
   linarith
+
+/-- **Optimality of the risk-free frontier portfolio**: among all risky exposure
+vectors attaining total return `m`, the frontier portfolio `w★` has the least
+variance. Writing any feasible `w = w★ + z`, the deviation `z` carries zero excess
+return, hence is `Σ`-orthogonal to `w★`, so `Var w = Var w★ + Var z ≥ Var w★`. -/
+theorem rfFrontierPortfolio_optimal
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf m : ℝ)
+    (hcov : covM.PosDef)
+    (he : excessReturn n μ rf ≠ 0) :
+    ∀ w : portfolioWeights n,
+      totalExpectedReturn n μ rf w = m →
+      riskFreeVariance n covM (rfFrontierPortfolio n covM μ rf m)
+        ≤ riskFreeVariance n covM w := by
+  intro w hw
+  have hzret := rf_feasible_deviation_expectedReturn_zero n covM μ rf m hcov he w hw
+  have hcross := rfFrontierPortfolio_cross_zero n covM μ rf m
+    (w - rfFrontierPortfolio n covM μ rf m) hcov hzret
+  have hadd := portfolioVariance_add_of_cross_zero n covM
+    (rfFrontierPortfolio n covM μ rf m) (w - rfFrontierPortfolio n covM μ rf m) hcov hcross
+  have hsplit : rfFrontierPortfolio n covM μ rf m
+      + (w - rfFrontierPortfolio n covM μ rf m) = w := by abel
+  rw [hsplit] at hadd
+  have hznn := portfolioVariance_nonneg n covM hcov.posSemidef
+    (w - rfFrontierPortfolio n covM μ rf m)
+  unfold riskFreeVariance
+  linarith
