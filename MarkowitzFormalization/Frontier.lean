@@ -736,3 +736,36 @@ theorem frontierPortfolio_optimal_unique_of_market
       = markowitzObjective n covM (frontierPortfolio n covM μ m) :=
     le_antisymm (hvmin _ hsfeas) (hsmin _ hvfeas)
   exact frontierPortfolio_unique_of_market n covM μ m market v hvfeas hobj
+
+/-! ### Efficient frontier -/
+
+/-- `w'` **dominates** `w` if it offers at least as much expected return, no greater
+variance, and is strictly better in at least one of the two (Pareto domination). -/
+def dominates (μ : portfolioWeights n) (covM : Matrix n n ℝ)
+    (w' w : portfolioWeights n) : Prop :=
+  expectedReturn n μ w ≤ expectedReturn n μ w'
+  ∧ portfolioVariance n covM w' ≤ portfolioVariance n covM w
+  ∧ (expectedReturn n μ w < expectedReturn n μ w'
+      ∨ portfolioVariance n covM w' < portfolioVariance n covM w)
+
+/-- A portfolio is **efficient** if it is fully invested (budget-feasible) and not
+dominated by any other budget-feasible portfolio. -/
+def efficientPortfolio (μ : portfolioWeights n) (covM : Matrix n n ℝ)
+    (w : portfolioWeights n) : Prop :=
+  w ∈ budgetSet n ∧ ¬ ∃ w' ∈ budgetSet n, dominates n μ covM w' w
+
+/-- **Symmetry of the variance parabola** about the vertex return `A/C`:
+`σ²(2·(A/C) − m) = σ²(m)`, since the completed-square offset only changes sign. -/
+theorem frontierPortfolio_variance_symm
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (m : ℝ)
+    (market : NonDegenerateMarket n μ covM) [Nonempty n] :
+    portfolioVariance n covM
+      (frontierPortfolio n covM μ
+        (2 * (frontierA n covM μ / frontierC n covM) - m))
+      =
+    portfolioVariance n covM
+      (frontierPortfolio n covM μ m) := by
+  rw [frontierPortfolio_variance_completed_square n covM μ
+      (2 * (frontierA n covM μ / frontierC n covM) - m) market,
+    frontierPortfolio_variance_completed_square n covM μ m market]
+  ring
