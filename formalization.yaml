@@ -1,0 +1,260 @@
+version: "v0.1"
+
+project:
+  name: "MarkowitzFormalization"
+  title: "Lean 4 formalization of risky-asset Markowitz mean-variance portfolio theory"
+  authors:
+    - "Christopher Darcy"
+  repository: "MarkowitzFormalization"
+  license: "not specified"
+  scope_summary: >-
+    A Lean 4 / Mathlib formalization of the deterministic mean-vector / covariance-matrix
+    layer of Markowitz portfolio optimization. The project assumes a finite universe of
+    risky assets, a given expected-return vector μ, and a positive-definite covariance
+    matrix Σ. It formalizes the risky-asset frontier, optimality, uniqueness, the frontier
+    variance equation, the global minimum variance portfolio, the efficient frontier, and
+    two-fund separation. The probabilistic construction of μ and Σ from random variables
+    is treated as an upstream modelling layer and is not formalized in this project.
+
+sources:
+  - title: "Markowitz lecture notes"
+    authors:
+      - "Cristopher Salvi"
+    id: "local-file: markowitz_lecture_notes.tex"
+    type: "lecture notes"
+    license: "course material / not redistributed"
+    author_contacted: "n/a"
+    prior_work: "Primary mathematical reference for the formalization plan and theorem coverage."
+  - title: "Portfolio Selection"
+    authors:
+      - "Harry Markowitz"
+    id: "Journal of Finance, 1952"
+    type: "journal article"
+    license: "publisher copyright"
+    author_contacted: "n/a"
+    prior_work: "Classical source for mean-variance portfolio theory."
+  - title: "Lean 4 and Mathlib documentation"
+    authors:
+      - "Lean FRO / Mathlib contributors"
+    id: "software-documentation"
+    type: "software documentation"
+    license: "open source"
+    author_contacted: "n/a"
+    prior_work: "Used for Lean syntax, Mathlib APIs, matrices, finite sums, dot products, and order/linear algebra lemmas."
+
+status:
+  scope: >-
+    The non-risk-free Markowitz theory is formalized end-to-end at the algebraic
+    mean-vector/covariance-matrix level. The development covers the risky-asset budget
+    constraint, expected return, variance and risk, covariance positive definiteness,
+    Markowitz feasibility and optimality, uniqueness of the optimizer, the closed-form
+    frontier portfolio, the frontier variance equation in closed and completed-square
+    forms, the global minimum variance portfolio, Pareto efficiency of the upper branch,
+    inefficiency of the lower branch, and two-fund separation.
+  build_status: "clean"
+  build_jobs: 2601
+  sorry_count: 0
+  admit_count: 0
+  custom_axioms: []
+  known_warnings:
+    - "Trivial warnings surpressed"
+  axioms:
+    - "propext"
+    - "Classical.choice"
+    - "Quot.sound"
+  limitations:
+    - >-
+      The formalization starts from primitive μ : n → ℝ and covM : Matrix n n ℝ.
+      It does not construct these objects from random variables, expectations, covariance,
+      or measure-theoretic probability spaces.
+    - >-
+      Risk-free asset results, capital market line, tangency portfolio optimality,
+      one-fund separation, and CAPM/security-market-line statements are not yet formalized.
+    - >-
+      The hyperbola rearrangement in the (σ, m) plane is not formalized; this is treated as
+      cosmetic because the variance parabola and completed-square form are proved directly.
+  main_results:
+    - declaration: "portfolioVariance_nonneg"
+      file: "MarkowitzFormalization/Portfolio.lean"
+      sorry_count: 0
+      description: "Portfolio variance is nonnegative under positive semidefiniteness."
+    - declaration: "portfolioVariance_eq_zero_of_posDef"
+      file: "MarkowitzFormalization/Portfolio.lean"
+      sorry_count: 0
+      description: "Under positive definiteness, zero variance forces the portfolio vector to be zero."
+    - declaration: "frontierD_pos"
+      file: "MarkowitzFormalization/Frontier.lean"
+      sorry_count: 0
+      description: "The Markowitz denominator D = BC - A² is strictly positive in a nondegenerate market."
+    - declaration: "frontierPortfolio_feasible_of_market"
+      file: "MarkowitzFormalization/Frontier.lean"
+      sorry_count: 0
+      description: "The closed-form frontier portfolio satisfies the budget and target-return constraints."
+    - declaration: "frontierPortfolio_optimal_of_market"
+      file: "MarkowitzFormalization/Frontier.lean"
+      sorry_count: 0
+      description: "The closed-form frontier portfolio minimizes variance among portfolios with the same target return."
+    - declaration: "frontierPortfolio_unique_of_market"
+      file: "MarkowitzFormalization/Frontier.lean"
+      sorry_count: 0
+      description: "A feasible portfolio with the same objective value as the frontier portfolio is equal to it."
+    - declaration: "frontierPortfolio_optimal_unique_of_market"
+      file: "MarkowitzFormalization/Frontier.lean"
+      sorry_count: 0
+      description: "Any Markowitz-optimal portfolio equals the closed-form frontier portfolio."
+    - declaration: "frontierPortfolio_variance_closed_form_of_market"
+      file: "MarkowitzFormalization/Frontier.lean"
+      sorry_count: 0
+      description: "The frontier variance equals (C m² - 2 A m + B) / D."
+    - declaration: "frontierPortfolio_variance_completed_square"
+      file: "MarkowitzFormalization/Frontier.lean"
+      sorry_count: 0
+      description: "The frontier variance equals 1/C + (C/D)(m - A/C)²."
+    - declaration: "frontierPortfolio_gmvp_weights"
+      file: "MarkowitzFormalization/Frontier.lean"
+      sorry_count: 0
+      description: "The global minimum variance portfolio has weights (1/C) Σ⁻¹1."
+    - declaration: "frontierPortfolio_gmvp_variance"
+      file: "MarkowitzFormalization/Frontier.lean"
+      sorry_count: 0
+      description: "The GMVP variance is 1/C."
+    - declaration: "frontierPortfolio_variance_ge_gmvp"
+      file: "MarkowitzFormalization/Frontier.lean"
+      sorry_count: 0
+      description: "Every frontier portfolio has variance at least the GMVP variance."
+    - declaration: "frontierPortfolio_two_fund"
+      file: "MarkowitzFormalization/Frontier.lean"
+      sorry_count: 0
+      description: "Every frontier portfolio is an affine combination of any two distinct frontier portfolios."
+    - declaration: "frontierPortfolio_not_efficient_of_lt_gmvp"
+      file: "MarkowitzFormalization/Frontier.lean"
+      sorry_count: 0
+      description: "Frontier portfolios below the GMVP return are not Pareto efficient."
+    - declaration: "frontierPortfolio_efficient_of_ge_gmvp"
+      file: "MarkowitzFormalization/Frontier.lean"
+      sorry_count: 0
+      description: "Frontier portfolios at or above the GMVP return are Pareto efficient."
+
+files:
+  - path: "MarkowitzFormalization/Basic.lean"
+    role: "project bootstrap / basic imports"
+  - path: "MarkowitzFormalization/Portfolio.lean"
+    role: "portfolio weights, budget set, expected return, variance, risk, covariance assumptions, market assumptions"
+  - path: "MarkowitzFormalization/Frontier.lean"
+    role: "risky-asset Markowitz frontier, optimality, uniqueness, GMVP, efficient frontier, two-fund separation"
+  - path: "MarkowitzFormalization/RiskFree.lean"
+    role: "planned risk-free extension; not part of the completed risky-asset core unless added later"
+
+automation:
+  methods:
+    - method: "agent-assisted formalization"
+      models:
+        - "Claude Code"
+        - "ChatGPT GPT-5.5 Thinking"
+      framework: "Human-directed Lean 4 development using Claude Code, lean-lsp/MCP, and ChatGPT for planning, theorem decomposition, and proof strategy."
+      tool_setup: >-
+        Lean 4 / Lake / Mathlib project. The development was repeatedly checked with
+        lean_build. Claude Code was used for in-repository edits and proof attempts; ChatGPT
+        was used for proof planning, theorem sequencing, checkpoint audits, and prompt design.
+      prompting_notes: >-
+        Work proceeded in small theorem milestones. Each major theorem was built only after
+        its helper lemmas compiled cleanly. Frequent checkpoint builds were used before commits.
+      cost:
+        wall_time: "not separately tracked"
+        spend: "not itemised; primarily subscription-based use of ChatGPT and Claude, with no separately recorded API spend"
+        hardware: "developer laptop / local Lean build environment"
+  spend: "not itemised"
+  notes: >-
+    The Lean kernel checks every proof. Agent assistance was used to write and repair proofs,
+    but the resulting correctness claim is the Lean build, not the model output.
+
+costs:
+  currency: "GBP"
+  direct_api_spend: "none separately recorded"
+  subscriptions:
+    - service: "ChatGPT Pro"
+      plan: "user subscription"
+      purpose: "proof planning, prompt design, review, theorem sequencing, checkpoint summaries"
+      cost: "20/month"
+    - service: "Claude Max"
+      plan: "user subscription / Claude Code access"
+      purpose: "Lean file editing, build runs, proof attempts, local theorem inventory"
+      cost: "75/month"
+  compute:
+    local_machine: "Thinkpad - Intel(R) Core(TM) Ultra 5 125U (1.30 GHz) - 16Gb RAM"
+    cloud_compute: "N/A"
+  human_time: "3.5 hours"
+  notes: >-
+    N/A
+
+fidelity:
+  mathematical_scope: >-
+    Faithful to the deterministic Markowitz mean-variance optimization layer used after a
+    mean vector and covariance matrix have been specified. The central optimization,
+    frontier, GMVP, efficient-frontier, and two-fund separation statements are represented
+    directly in Lean.
+  divergences: >-
+    The formalization does not derive expected returns or covariances from random variables.
+    It does not yet include the risk-free asset, Sharpe ratio, capital market line,
+    tangency portfolio, one-fund separation, or CAPM. These are future extensions rather
+    than failures of the current risky-asset formalization.
+  statement_style: >-
+    Theorems are stated over an arbitrary finite asset type n with Fintype and DecidableEq
+    assumptions where needed. Positive definiteness is encoded through Mathlib's matrix
+    PosDef API. Efficiency compares against all budget-feasible portfolios, not merely
+    frontier portfolios.
+
+review:
+  status: "self-reviewed"
+  reviewers:
+    - "Christopher Darcy"
+    - "ChatGPT-assisted checkpoint audits"
+    - "Claude Code build and declaration inventory checks"
+  notes: >-
+    The source was repeatedly audited by running lean_build and checking theorem inventories.
+    The final risky-asset core has no sorry/admit/stop and a clean build apart from cosmetic
+    style diagnostics. This is not external peer review.
+
+alignment:
+  namespace: "MarkowitzFormalization"
+  statements:
+    - source: "Markowitz constrained optimization problem"
+      lean: "frontierPortfolio_optimal_of_market"
+      module: "MarkowitzFormalization.Frontier"
+      status: "proved"
+      note: "Closed-form frontier portfolio minimizes variance at fixed target return."
+    - source: "Uniqueness of the Markowitz optimizer"
+      lean: "frontierPortfolio_optimal_unique_of_market"
+      module: "MarkowitzFormalization.Frontier"
+      status: "proved"
+      note: "Any optimal feasible portfolio equals the frontier portfolio."
+    - source: "Frontier variance parabola"
+      lean: "frontierPortfolio_variance_closed_form_of_market"
+      module: "MarkowitzFormalization.Frontier"
+      status: "proved"
+      note: "Formalizes σ²(m) = (C m² - 2 A m + B) / D."
+    - source: "Completed-square frontier equation"
+      lean: "frontierPortfolio_variance_completed_square"
+      module: "MarkowitzFormalization.Frontier"
+      status: "proved"
+      note: "Formalizes σ²(m) = 1/C + (C/D)(m - A/C)²."
+    - source: "Global minimum variance portfolio"
+      lean: "frontierPortfolio_gmvp_weights / frontierPortfolio_gmvp_variance / frontierPortfolio_variance_ge_gmvp"
+      module: "MarkowitzFormalization.Frontier"
+      status: "proved"
+      note: "Weights, variance, and global lower bound are all formalized."
+    - source: "Efficient frontier"
+      lean: "frontierPortfolio_efficient_of_ge_gmvp / frontierPortfolio_not_efficient_of_lt_gmvp"
+      module: "MarkowitzFormalization.Frontier"
+      status: "proved"
+      note: "Upper branch is efficient; lower branch below GMVP is dominated and not efficient."
+    - source: "Two-fund separation"
+      lean: "frontierPortfolio_two_fund"
+      module: "MarkowitzFormalization.Frontier"
+      status: "proved"
+      note: "Any frontier portfolio is an affine combination of any two distinct frontier portfolios."
+
+acknowledgements: >-
+  Built using Lean 4, Mathlib, Lake, Claude Code, and ChatGPT. The mathematical reference
+  material was the Markowitz lecture notes supplied with the project and the classical
+  Markowitz mean-variance portfolio framework.
