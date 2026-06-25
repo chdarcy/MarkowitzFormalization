@@ -419,3 +419,18 @@ theorem mulVec_frontierPortfolio (covM : Matrix n n ℝ) (μ : portfolioWeights 
       = frontierLambda n covM μ m • μ + frontierGamma n covM μ m • onesVec n := by
   rw [frontierPortfolio_def, Matrix.mulVec_add, Matrix.mulVec_smul, Matrix.mulVec_smul,
     posDef_mulVec_inv_mulVec n hcov, posDef_mulVec_inv_mulVec n hcov]
+
+omit [DecidableEq n] in
+/-- Variance is additive across `w` and `z` when their `Σ`-cross term vanishes
+(`z ⬝ᵥ Σ w = 0`): `var(w + z) = var w + var z`. The two cross terms agree by symmetry
+of the `Σ`-form and both vanish. -/
+theorem portfolioVariance_add_of_cross_zero
+    (covM : Matrix n n ℝ) (w z : portfolioWeights n)
+    (hcov : covM.PosDef)
+    (hcross : z ⬝ᵥ covM.mulVec w = 0) :
+    portfolioVariance n covM (w + z)
+      = portfolioVariance n covM w + portfolioVariance n covM z := by
+  unfold portfolioVariance
+  rw [Matrix.mulVec_add, add_dotProduct, dotProduct_add, dotProduct_add,
+    cov_dotProduct_symm n covM hcov w z, hcross]
+  ring
