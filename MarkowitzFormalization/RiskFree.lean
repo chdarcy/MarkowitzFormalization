@@ -390,3 +390,17 @@ theorem tangencyPortfolio_totalExpectedReturn
     rf + sharpeSquared n covM μ rf / tangencyDenominator n covM μ rf := by
   unfold totalExpectedReturn
   rw [tangencyPortfolio_expectedExcessReturn]
+
+/-- **Capital Market Line (squared form)**: `σ² · (eᵀΣ⁻¹e) = (m - rf)²`. The
+denominator-free restatement of `rfFrontierPortfolio_variance`, expressing the CML
+slope² `S = eᵀΣ⁻¹e` as the ratio of squared excess return to variance. -/
+theorem capitalMarketLine_squared
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf m : ℝ)
+    (hcov : covM.PosDef)
+    (he : excessReturn n μ rf ≠ 0) :
+    riskFreeVariance n covM (rfFrontierPortfolio n covM μ rf m)
+      * sharpeSquared n covM μ rf
+        = (m - rf) ^ 2 := by
+  have hS : sharpeSquared n covM μ rf ≠ 0 := (sharpeSquared_pos n covM μ rf hcov he).ne'
+  rw [rfFrontierPortfolio_variance n covM μ rf m hcov he]
+  field_simp
