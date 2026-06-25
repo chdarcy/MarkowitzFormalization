@@ -720,3 +720,19 @@ theorem frontierPortfolio_unique_of_market
   have hz0 : z = 0 :=
     portfolioVariance_eq_zero_of_posDef n covM market.posDef z hzvar
   rw [hvwz, hz0, add_zero]
+
+/-- **Uniqueness of the optimal portfolio**: any Markowitz-optimal portfolio is *the*
+frontier portfolio. Both `v` and `w★` minimise the objective over the same feasible set,
+so their objective values coincide by antisymmetry, and uniqueness applies. -/
+theorem frontierPortfolio_optimal_unique_of_market
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (m : ℝ)
+    (market : NonDegenerateMarket n μ covM) [Nonempty n]
+    (v : portfolioWeights n)
+    (hvopt : markowitzOptimal n covM μ m v) :
+    v = frontierPortfolio n covM μ m := by
+  obtain ⟨hvfeas, hvmin⟩ := hvopt
+  obtain ⟨hsfeas, hsmin⟩ := frontierPortfolio_optimal_of_market n covM μ m market
+  have hobj : markowitzObjective n covM v
+      = markowitzObjective n covM (frontierPortfolio n covM μ m) :=
+    le_antisymm (hvmin _ hsfeas) (hsmin _ hvfeas)
+  exact frontierPortfolio_unique_of_market n covM μ m market v hvfeas hobj
