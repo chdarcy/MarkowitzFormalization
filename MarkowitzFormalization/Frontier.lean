@@ -664,3 +664,24 @@ theorem frontierPortfolio_affine_in_m
   simp only [Pi.add_apply, Pi.sub_apply, Pi.smul_apply, smul_eq_mul]
   field_simp [hD]
   ring
+
+/-- **Two-fund separation theorem** (`thm:twofund`): every frontier portfolio is the
+affine combination `w★(m) = α·w★(m₁) + (1−α)·w★(m₂)` of any two distinct frontier
+portfolios, with mixing weight `α = (m − m₂)/(m₁ − m₂)`. A direct consequence of the
+affineness of `w★(·)` in the target return. -/
+theorem frontierPortfolio_two_fund
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n)
+    (m m₁ m₂ : ℝ)
+    (hD : frontierD n covM μ ≠ 0)
+    (hm : m₁ ≠ m₂) :
+    frontierPortfolio n covM μ m
+      =
+        ((m - m₂) / (m₁ - m₂)) • frontierPortfolio n covM μ m₁
+        + (1 - (m - m₂) / (m₁ - m₂)) • frontierPortfolio n covM μ m₂ := by
+  rw [frontierPortfolio_affine_in_m n covM μ m hD,
+    frontierPortfolio_affine_in_m n covM μ m₁ hD,
+    frontierPortfolio_affine_in_m n covM μ m₂ hD]
+  funext i
+  simp only [Pi.add_apply, Pi.sub_apply, Pi.smul_apply, smul_eq_mul]
+  field_simp [hD, sub_ne_zero.mpr hm]
+  ring
