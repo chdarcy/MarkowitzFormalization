@@ -809,3 +809,21 @@ theorem frontierPortfolio_not_efficient_of_lt_gmvp
     frontierPortfolio_budget_of_market n covM μ
       (2 * (frontierA n covM μ / frontierC n covM) - m) market,
     frontierPortfolio_dominated_of_lt_gmvp n covM μ m market hm⟩
+
+/-- **Lower envelope**: the frontier portfolio matching a budget-feasible portfolio's
+own expected return has no greater variance — the frontier is the variance-minimising
+boundary at each return level. -/
+theorem budget_variance_ge_frontier_at_return
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n)
+    (market : NonDegenerateMarket n μ covM) [Nonempty n]
+    (w : portfolioWeights n)
+    (hw : w ∈ budgetSet n) :
+    portfolioVariance n covM
+      (frontierPortfolio n covM μ (expectedReturn n μ w))
+      ≤ portfolioVariance n covM w := by
+  obtain ⟨_, hmin⟩ :=
+    frontierPortfolio_optimal_of_market n covM μ (expectedReturn n μ w) market
+  have hwfeas : w ∈ feasibleSet n μ (expectedReturn n μ w) := ⟨hw, rfl⟩
+  have hobj := hmin w hwfeas
+  rw [markowitzObjective_def, markowitzObjective_def] at hobj
+  linarith
