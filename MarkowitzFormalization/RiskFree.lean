@@ -363,3 +363,19 @@ theorem tangencyPortfolio_riskFreeWeight_zero
   unfold riskFreeWeight
   rw [← expectedReturn_onesVec_eq_sum, tangencyPortfolio_budget n covM μ rf hD]
   ring
+
+/-- **One-fund separation**: every risk-free frontier portfolio is a scalar multiple
+of the single tangency portfolio. Both `w★` and `w_T` are multiples of `Σ⁻¹e`, so
+`w★ = ((m - rf)·D / S) • w_T`, with `D = 1ᵀΣ⁻¹e`. Pure algebra — needs only `D ≠ 0`. -/
+theorem rfFrontierPortfolio_one_fund
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf m : ℝ)
+    (hD : tangencyDenominator n covM μ rf ≠ 0) :
+    rfFrontierPortfolio n covM μ rf m
+      =
+    (((m - rf) * tangencyDenominator n covM μ rf)
+      / sharpeSquared n covM μ rf)
+      • tangencyPortfolio n covM μ rf := by
+  unfold rfFrontierPortfolio tangencyPortfolio
+  rw [smul_smul]
+  congr 1
+  field_simp
