@@ -484,3 +484,34 @@ theorem feasible_deviation_budget_zero
   simp only [Pi.sub_apply, Finset.sum_sub_distrib]
   rw [hvsum, hwsum]
   ring
+
+/-- **Optimality of the frontier portfolio.** In a non-degenerate market the frontier
+portfolio minimises variance (equivalently the Markowitz objective) over all feasible
+portfolios with the prescribed expected return `m`. The proof completes the square:
+any feasible `v` writes as `w★ + z` with `z` of zero excess return and zero budget, so
+the `Σ`-cross term vanishes and `var v = var w★ + var z ≥ var w★`. -/
+theorem frontierPortfolio_optimal_of_market
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (m : ℝ)
+    (market : NonDegenerateMarket n μ covM) [Nonempty n] :
+    markowitzOptimal n covM μ m (frontierPortfolio n covM μ m) := by
+  refine ⟨frontierPortfolio_feasible_of_market n covM μ m market, ?_⟩
+  intro v hv
+  set z := v - frontierPortfolio n covM μ m with hz
+  have hzret : expectedReturn n μ z = 0 :=
+    feasible_deviation_expectedReturn_zero n covM μ m market v hv
+  have hzbud : ∑ i, z i = 0 :=
+    feasible_deviation_budget_zero n covM μ m market v hv
+  have hcross : z ⬝ᵥ covM.mulVec (frontierPortfolio n covM μ m) = 0 :=
+    frontierPortfolio_cross_zero n covM μ m z market.posDef hzret hzbud
+  have hvwz : v = frontierPortfolio n covM μ m + z := by rw [hz]; abel
+  have hvar : portfolioVariance n covM v
+      = portfolioVariance n covM (frontierPortfolio n covM μ m)
+        + portfolioVariance n covM z := by
+    rw [hvwz]
+    exact portfolioVariance_add_of_cross_zero n covM
+      (frontierPortfolio n covM μ m) z market.posDef hcross
+  have hznn : 0 ≤ portfolioVariance n covM z :=
+    portfolioVariance_nonneg n covM market.posDef.posSemidef z
+  simp only [markowitzObjective_def]
+  rw [hvar]
+  nlinarith [hznn]
