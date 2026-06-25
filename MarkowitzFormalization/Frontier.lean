@@ -596,3 +596,22 @@ theorem frontierPortfolio_variance_completed_square
   rw [frontierPortfolio_variance_closed_form_of_market n covM μ m market, key]
   field_simp
   ring
+
+/-- **GMVP weights** (`cor:gmvp`): at the vertex return `m = A/C` the multiplier `λ`
+vanishes and `γ = 1/C`, so the frontier portfolio collapses to
+`w_g = (1/C)·Σ⁻¹1`, the global minimum-variance portfolio. -/
+theorem frontierPortfolio_gmvp_weights
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n)
+    (market : NonDegenerateMarket n μ covM) [Nonempty n] :
+    frontierPortfolio n covM μ (frontierA n covM μ / frontierC n covM)
+      = (1 / frontierC n covM) • covM⁻¹.mulVec (onesVec n) := by
+  have hC : frontierC n covM ≠ 0 := (frontierC_pos n covM market.posDef).ne'
+  have hD : frontierD n covM μ ≠ 0 := (frontierD_pos n covM μ market).ne'
+  have key : frontierB n covM μ
+      = (frontierD n covM μ + frontierA n covM μ ^ 2) / frontierC n covM := by
+    rw [eq_div_iff hC, frontierD_eq]; ring
+  rw [frontierPortfolio_def, frontierLambda_def, frontierGamma_def, key]
+  funext i
+  simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul]
+  field_simp
+  ring
