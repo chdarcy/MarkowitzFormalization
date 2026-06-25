@@ -328,3 +328,18 @@ theorem tangencyPortfolio_expectedExcessReturn
   unfold tangencyPortfolio
   rw [expectedReturn_smul, hexp]
   ring
+
+/-- **Tangency portfolio is fully invested**: when the tangency denominator is
+nonzero, the risky weights sum to `1` (so the implicit cash weight is `0`). Since
+`w_T = (1/D)·Σ⁻¹e` and `1ᵀΣ⁻¹e = D`, the total risky weight is `(1/D)·D = 1`. -/
+theorem tangencyPortfolio_budget
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf : ℝ)
+    (hD : tangencyDenominator n covM μ rf ≠ 0) :
+    expectedReturn n (onesVec n) (tangencyPortfolio n covM μ rf) = 1 := by
+  have hD' : expectedReturn n (onesVec n)
+      (covM⁻¹.mulVec (excessReturn n μ rf)) = tangencyDenominator n covM μ rf := by
+    unfold expectedReturn tangencyDenominator
+    exact dotProduct_comm _ _
+  unfold tangencyPortfolio
+  rw [expectedReturn_smul, hD']
+  field_simp
