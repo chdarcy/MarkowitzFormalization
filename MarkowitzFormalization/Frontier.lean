@@ -538,3 +538,17 @@ theorem frontierPortfolio_variance_eq_lambda_gamma
   rw [mulVec_frontierPortfolio n covM μ m hcov, dotProduct_comm, add_dotProduct,
     smul_dotProduct, smul_dotProduct, smul_eq_mul, smul_eq_mul, hmu, hone]
   ring
+
+/-- Closed form for the affine optimal variance: substituting the Cramer formulas
+`λ = (Cm − A)/D`, `γ = (B − Am)/D` gives `λ·m + γ = (Cm² − 2Am + B)/D`. Pure algebra
+over the common denominator `D ≠ 0`. -/
+theorem frontier_affine_closed_form
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (m : ℝ)
+    (hD : frontierD n covM μ ≠ 0) :
+    frontierLambda n covM μ m * m + frontierGamma n covM μ m
+      = (frontierC n covM * m ^ 2
+          - 2 * frontierA n covM μ * m
+          + frontierB n covM μ) / frontierD n covM μ := by
+  rw [frontierLambda_def, frontierGamma_def]
+  field_simp [hD]
+  ring
