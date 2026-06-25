@@ -643,3 +643,24 @@ theorem frontierPortfolio_variance_ge_gmvp
       * (m - frontierA n covM μ / frontierC n covM) ^ 2 :=
     mul_nonneg (div_pos hC hD).le (sq_nonneg _)
   linarith
+
+/-! ### Affine structure of the frontier (towards two-fund separation) -/
+
+/-- The frontier portfolio is an **affine function of the target return** `m`:
+`w★(m) = m·a + b` with fixed direction `a = (C·Σ⁻¹μ − A·Σ⁻¹1)/D` and offset
+`b = (B·Σ⁻¹1 − A·Σ⁻¹μ)/D`. This is the structural core of two-fund separation. -/
+theorem frontierPortfolio_affine_in_m
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n)
+    (m : ℝ) (hD : frontierD n covM μ ≠ 0) :
+    frontierPortfolio n covM μ m
+      =
+        m • ((frontierC n covM / frontierD n covM μ) • covM⁻¹.mulVec μ
+              - (frontierA n covM μ / frontierD n covM μ) • covM⁻¹.mulVec (onesVec n))
+        +
+        ((frontierB n covM μ / frontierD n covM μ) • covM⁻¹.mulVec (onesVec n)
+              - (frontierA n covM μ / frontierD n covM μ) • covM⁻¹.mulVec μ) := by
+  rw [frontierPortfolio_def, frontierLambda_def, frontierGamma_def]
+  funext i
+  simp only [Pi.add_apply, Pi.sub_apply, Pi.smul_apply, smul_eq_mul]
+  field_simp [hD]
+  ring
