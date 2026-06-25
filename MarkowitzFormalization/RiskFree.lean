@@ -286,3 +286,16 @@ theorem rfFrontierPortfolio_unique
   have hz0 : w - rfFrontierPortfolio n covM μ rf m = 0 :=
     portfolioVariance_eq_zero_of_posDef n covM hcov _ hVarz
   exact sub_eq_zero.mp hz0
+
+/-!
+## Tangency portfolio basics
+-/
+
+omit [Fintype n] [DecidableEq n] in
+/-- The **excess-return vector** as a vector difference: `e = μ - rf·1`. This recasts
+`excessReturn` so the `Σ⁻¹`/dot-product linearity lemmas can split the tangency
+denominator into the frontier scalars `A` and `C`. -/
+theorem excessReturn_eq_sub_smul_ones (μ : portfolioWeights n) (rf : ℝ) :
+    excessReturn n μ rf = μ - rf • onesVec n := by
+  funext i
+  simp [excessReturn, onesVec]
