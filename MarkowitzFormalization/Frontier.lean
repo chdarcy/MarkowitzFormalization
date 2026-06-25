@@ -451,3 +451,36 @@ theorem frontierPortfolio_cross_zero
     exact hzbud
   rw [h1, h2]
   ring
+
+/-- A feasible `v` deviates from the frontier portfolio with zero excess return:
+`expectedReturn μ (v − w★) = m − m = 0`. -/
+theorem feasible_deviation_expectedReturn_zero
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (m : ℝ)
+    (market : NonDegenerateMarket n μ covM) [Nonempty n]
+    (v : portfolioWeights n)
+    (hv : v ∈ feasibleSet n μ m) :
+    expectedReturn n μ (v - frontierPortfolio n covM μ m) = 0 := by
+  obtain ⟨_, hvret⟩ := (mem_feasibleSet n μ m v).mp hv
+  have hwret : expectedReturn n μ (frontierPortfolio n covM μ m) = m :=
+    frontierPortfolio_expectedReturn_of_market n covM μ m market
+  have hsplit : expectedReturn n μ (v - frontierPortfolio n covM μ m)
+      = expectedReturn n μ v - expectedReturn n μ (frontierPortfolio n covM μ m) := by
+    simp only [expectedReturn, Pi.sub_apply, sub_mul, Finset.sum_sub_distrib]
+  rw [hsplit, hvret, hwret]
+  ring
+
+/-- A feasible `v` deviates from the frontier portfolio with zero net budget:
+`∑ (v − w★) = 1 − 1 = 0`. -/
+theorem feasible_deviation_budget_zero
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (m : ℝ)
+    (market : NonDegenerateMarket n μ covM) [Nonempty n]
+    (v : portfolioWeights n)
+    (hv : v ∈ feasibleSet n μ m) :
+    ∑ i, (v - frontierPortfolio n covM μ m) i = 0 := by
+  obtain ⟨hvbud, _⟩ := (mem_feasibleSet n μ m v).mp hv
+  have hvsum : ∑ i, v i = 1 := hvbud
+  have hwsum : ∑ i, frontierPortfolio n covM μ m i = 1 :=
+    frontierPortfolio_budget_of_market n covM μ m market
+  simp only [Pi.sub_apply, Finset.sum_sub_distrib]
+  rw [hvsum, hwsum]
+  ring
