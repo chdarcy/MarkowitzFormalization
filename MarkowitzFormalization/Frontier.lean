@@ -827,3 +827,24 @@ theorem budget_variance_ge_frontier_at_return
   have hobj := hmin w hwfeas
   rw [markowitzObjective_def, markowitzObjective_def] at hobj
   linarith
+
+/-- **Strict monotonicity on the upper branch**: for target returns at or above the
+GMVP return `A/C`, the frontier variance is strictly increasing in `m`. -/
+theorem frontierPortfolio_variance_strictMono_ge
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n)
+    (m₁ m₂ : ℝ)
+    (market : NonDegenerateMarket n μ covM) [Nonempty n]
+    (hge : frontierA n covM μ / frontierC n covM ≤ m₁)
+    (hlt : m₁ < m₂) :
+    portfolioVariance n covM (frontierPortfolio n covM μ m₁)
+      < portfolioVariance n covM (frontierPortfolio n covM μ m₂) := by
+  have hCD : 0 < frontierC n covM / frontierD n covM μ :=
+    div_pos (frontierC_pos n covM market.posDef) (frontierD_pos n covM μ market)
+  have h0 : 0 ≤ m₁ - frontierA n covM μ / frontierC n covM := by linarith
+  have h1 : m₁ - frontierA n covM μ / frontierC n covM
+      < m₂ - frontierA n covM μ / frontierC n covM := by linarith
+  have hsq : (m₁ - frontierA n covM μ / frontierC n covM) ^ 2
+      < (m₂ - frontierA n covM μ / frontierC n covM) ^ 2 := by nlinarith [h0, h1]
+  rw [frontierPortfolio_variance_completed_square n covM μ m₁ market,
+    frontierPortfolio_variance_completed_square n covM μ m₂ market]
+  linarith [mul_lt_mul_of_pos_left hsq hCD]
