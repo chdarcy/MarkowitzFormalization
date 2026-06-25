@@ -769,3 +769,29 @@ theorem frontierPortfolio_variance_symm
       (2 * (frontierA n covM μ / frontierC n covM) - m) market,
     frontierPortfolio_variance_completed_square n covM μ m market]
   ring
+
+/-- **Frontier portfolios below the GMVP return are inefficient**: for `m < A/C` the
+vertex-reflected portfolio `w★(2·A/C − m)` has the same variance but strictly greater
+expected return, hence dominates `w★(m)`. -/
+theorem frontierPortfolio_dominated_of_lt_gmvp
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (m : ℝ)
+    (market : NonDegenerateMarket n μ covM) [Nonempty n]
+    (hm : m < frontierA n covM μ / frontierC n covM) :
+    dominates n μ covM
+      (frontierPortfolio n covM μ
+        (2 * (frontierA n covM μ / frontierC n covM) - m))
+      (frontierPortfolio n covM μ m) := by
+  have hret : expectedReturn n μ (frontierPortfolio n covM μ m) = m :=
+    frontierPortfolio_expectedReturn_of_market n covM μ m market
+  have hret' : expectedReturn n μ
+      (frontierPortfolio n covM μ (2 * (frontierA n covM μ / frontierC n covM) - m))
+        = 2 * (frontierA n covM μ / frontierC n covM) - m :=
+    frontierPortfolio_expectedReturn_of_market n covM μ
+      (2 * (frontierA n covM μ / frontierC n covM) - m) market
+  have hvar : portfolioVariance n covM
+      (frontierPortfolio n covM μ (2 * (frontierA n covM μ / frontierC n covM) - m))
+        = portfolioVariance n covM (frontierPortfolio n covM μ m) :=
+    frontierPortfolio_variance_symm n covM μ m market
+  refine ⟨?_, le_of_eq hvar, ?_⟩
+  · rw [hret, hret']; linarith
+  · left; rw [hret, hret']; linarith
