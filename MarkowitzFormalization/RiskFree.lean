@@ -257,3 +257,32 @@ theorem rfFrontierPortfolio_optimal
     (w - rfFrontierPortfolio n covM μ rf m)
   unfold riskFreeVariance
   linarith
+
+/-- **Uniqueness of the risk-free frontier optimiser**: any risky exposure vector
+attaining return `m` with the minimal variance must equal `w★`. The deviation
+`z = w - w★` is `Σ`-orthogonal to `w★`, so equal variances force `Var z = 0`, and
+positive-definiteness gives `z = 0`. -/
+theorem rfFrontierPortfolio_unique
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf m : ℝ)
+    (hcov : covM.PosDef)
+    (he : excessReturn n μ rf ≠ 0)
+    (w : portfolioWeights n)
+    (hw : totalExpectedReturn n μ rf w = m)
+    (hopt :
+      riskFreeVariance n covM w
+        = riskFreeVariance n covM (rfFrontierPortfolio n covM μ rf m)) :
+    w = rfFrontierPortfolio n covM μ rf m := by
+  have hzret := rf_feasible_deviation_expectedReturn_zero n covM μ rf m hcov he w hw
+  have hcross := rfFrontierPortfolio_cross_zero n covM μ rf m
+    (w - rfFrontierPortfolio n covM μ rf m) hcov hzret
+  have hadd := portfolioVariance_add_of_cross_zero n covM
+    (rfFrontierPortfolio n covM μ rf m) (w - rfFrontierPortfolio n covM μ rf m) hcov hcross
+  have hsplit : rfFrontierPortfolio n covM μ rf m
+      + (w - rfFrontierPortfolio n covM μ rf m) = w := by abel
+  rw [hsplit] at hadd
+  rw [riskFreeVariance_def, riskFreeVariance_def] at hopt
+  have hVarz : portfolioVariance n covM (w - rfFrontierPortfolio n covM μ rf m) = 0 := by
+    linarith
+  have hz0 : w - rfFrontierPortfolio n covM μ rf m = 0 :=
+    portfolioVariance_eq_zero_of_posDef n covM hcov _ hVarz
+  exact sub_eq_zero.mp hz0
