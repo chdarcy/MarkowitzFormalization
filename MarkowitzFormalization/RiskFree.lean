@@ -299,3 +299,15 @@ theorem excessReturn_eq_sub_smul_ones (μ : portfolioWeights n) (rf : ℝ) :
     excessReturn n μ rf = μ - rf • onesVec n := by
   funext i
   simp [excessReturn, onesVec]
+
+/-- **Tangency denominator in frontier scalars**: `1ᵀΣ⁻¹e = A - rf·C`. Splitting
+`e = μ - rf·1` through the linearity of `Σ⁻¹·` and the dot product gives
+`1ᵀΣ⁻¹μ - rf·(1ᵀΣ⁻¹1) = A - rf·C`. -/
+theorem tangencyDenominator_eq_frontierA_sub_rf_frontierC
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf : ℝ) :
+    tangencyDenominator n covM μ rf
+      = frontierA n covM μ - rf * frontierC n covM := by
+  unfold tangencyDenominator frontierA frontierC
+  rw [excessReturn_eq_sub_smul_ones, Matrix.mulVec_sub, Matrix.mulVec_smul, dotProduct_sub,
+    dotProduct_comm (onesVec n) (rf • covM⁻¹.mulVec (onesVec n)), smul_dotProduct,
+    dotProduct_comm (covM⁻¹.mulVec (onesVec n)) (onesVec n), smul_eq_mul]
