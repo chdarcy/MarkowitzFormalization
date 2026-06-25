@@ -576,3 +576,23 @@ theorem frontierPortfolio_variance_closed_form_of_market
           + frontierB n covM μ) / frontierD n covM μ :=
   frontierPortfolio_variance_closed_form n covM μ m market.posDef
     (frontierD_pos n covM μ market).ne'
+
+/-- **Vertex (completed-square) form** of the frontier variance equation
+(`thm:parabola`, second equality):
+`σ²(m) = 1/C + (C/D)·(m − A/C)²`. This exhibits the parabola's minimum at `m = A/C`
+with value `1/C`. The algebraic key is `B·C = D + A²` (from `frontierD_eq`). -/
+theorem frontierPortfolio_variance_completed_square
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (m : ℝ)
+    (market : NonDegenerateMarket n μ covM) [Nonempty n] :
+    portfolioVariance n covM (frontierPortfolio n covM μ m)
+      = 1 / frontierC n covM
+          + (frontierC n covM / frontierD n covM μ)
+              * (m - frontierA n covM μ / frontierC n covM) ^ 2 := by
+  have hC : frontierC n covM ≠ 0 := (frontierC_pos n covM market.posDef).ne'
+  have hD : frontierD n covM μ ≠ 0 := (frontierD_pos n covM μ market).ne'
+  have key : frontierB n covM μ
+      = (frontierD n covM μ + frontierA n covM μ ^ 2) / frontierC n covM := by
+    rw [eq_div_iff hC, frontierD_eq]; ring
+  rw [frontierPortfolio_variance_closed_form_of_market n covM μ m market, key]
+  field_simp
+  ring
