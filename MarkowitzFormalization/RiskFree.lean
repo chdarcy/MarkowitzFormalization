@@ -193,3 +193,16 @@ theorem mulVec_rfFrontierPortfolio
       = ((m - rf) / sharpeSquared n covM μ rf) • excessReturn n μ rf := by
   unfold rfFrontierPortfolio
   rw [Matrix.mulVec_smul, posDef_mulVec_inv_mulVec n hcov (excessReturn n μ rf)]
+
+/-- **Cross term vanishes**: if a deviation `z` has zero excess return
+(`eᵀz = 0`), then it is `Σ`-orthogonal to the risk-free frontier portfolio,
+because `Σ w★ = a • e` and so `zᵀ Σ w★ = a · (eᵀz) = 0`. -/
+theorem rfFrontierPortfolio_cross_zero
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (rf m : ℝ)
+    (z : portfolioWeights n)
+    (hcov : covM.PosDef)
+    (hz : expectedReturn n (excessReturn n μ rf) z = 0) :
+    z ⬝ᵥ covM.mulVec (rfFrontierPortfolio n covM μ rf m) = 0 := by
+  have hz' : z ⬝ᵥ excessReturn n μ rf = 0 := hz
+  rw [mulVec_rfFrontierPortfolio n covM μ rf m hcov, dotProduct_comm z,
+    smul_dotProduct, dotProduct_comm (excessReturn n μ rf) z, hz', smul_zero]
