@@ -685,3 +685,38 @@ theorem frontierPortfolio_two_fund
   simp only [Pi.add_apply, Pi.sub_apply, Pi.smul_apply, smul_eq_mul]
   field_simp [hD, sub_ne_zero.mpr hm]
   ring
+
+/-! ### Uniqueness of the frontier minimiser -/
+
+/-- **Uniqueness of the Markowitz minimiser** (`thm:frontier`, uniqueness part): any
+feasible portfolio attaining the optimal objective value equals the frontier portfolio.
+The deviation `z = v − w★` has zero variance (the objective values agree and variance
+splits as `var v = var w★ + var z`), so positive definiteness forces `z = 0`. -/
+theorem frontierPortfolio_unique_of_market
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (m : ℝ)
+    (market : NonDegenerateMarket n μ covM) [Nonempty n]
+    (v : portfolioWeights n)
+    (hv : v ∈ feasibleSet n μ m)
+    (hobj : markowitzObjective n covM v
+              = markowitzObjective n covM (frontierPortfolio n covM μ m)) :
+    v = frontierPortfolio n covM μ m := by
+  set z := v - frontierPortfolio n covM μ m with hz
+  have hzret : expectedReturn n μ z = 0 :=
+    feasible_deviation_expectedReturn_zero n covM μ m market v hv
+  have hzbud : ∑ i, z i = 0 :=
+    feasible_deviation_budget_zero n covM μ m market v hv
+  have hcross : z ⬝ᵥ covM.mulVec (frontierPortfolio n covM μ m) = 0 :=
+    frontierPortfolio_cross_zero n covM μ m z market.posDef hzret hzbud
+  have hvwz : v = frontierPortfolio n covM μ m + z := by rw [hz]; abel
+  have hvar : portfolioVariance n covM v
+      = portfolioVariance n covM (frontierPortfolio n covM μ m)
+        + portfolioVariance n covM z := by
+    rw [hvwz]
+    exact portfolioVariance_add_of_cross_zero n covM
+      (frontierPortfolio n covM μ m) z market.posDef hcross
+  have hzvar : portfolioVariance n covM z = 0 := by
+    rw [markowitzObjective_def, markowitzObjective_def, hvar] at hobj
+    linarith
+  have hz0 : z = 0 :=
+    portfolioVariance_eq_zero_of_posDef n covM market.posDef z hzvar
+  rw [hvwz, hz0, add_zero]
