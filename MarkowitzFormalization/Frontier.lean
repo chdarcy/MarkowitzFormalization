@@ -552,3 +552,27 @@ theorem frontier_affine_closed_form
   rw [frontierLambda_def, frontierGamma_def]
   field_simp [hD]
   ring
+
+/-- **Equation of the minimum-variance frontier** (`thm:parabola`, first equality):
+the optimal variance is the quadratic `σ²(m) = (Cm² − 2Am + B)/D` in the target return. -/
+theorem frontierPortfolio_variance_closed_form
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (m : ℝ)
+    (hcov : covM.PosDef) (hD : frontierD n covM μ ≠ 0) :
+    portfolioVariance n covM (frontierPortfolio n covM μ m)
+      = (frontierC n covM * m ^ 2
+          - 2 * frontierA n covM μ * m
+          + frontierB n covM μ) / frontierD n covM μ := by
+  rw [frontierPortfolio_variance_eq_lambda_gamma n covM μ m hcov hD,
+    frontier_affine_closed_form n covM μ m hD]
+
+/-- The frontier variance equation on a non-degenerate market, with `D ≠ 0`
+discharged by `frontierD_pos`. -/
+theorem frontierPortfolio_variance_closed_form_of_market
+    (covM : Matrix n n ℝ) (μ : portfolioWeights n) (m : ℝ)
+    (market : NonDegenerateMarket n μ covM) [Nonempty n] :
+    portfolioVariance n covM (frontierPortfolio n covM μ m)
+      = (frontierC n covM * m ^ 2
+          - 2 * frontierA n covM μ * m
+          + frontierB n covM μ) / frontierD n covM μ :=
+  frontierPortfolio_variance_closed_form n covM μ m market.posDef
+    (frontierD_pos n covM μ market).ne'
