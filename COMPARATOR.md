@@ -139,6 +139,14 @@ exits 0.
 
 ## 4. Sandboxing: real `landrun` and the `fake-landrun` fallback
 
+The triples were first brought up using the **`fake-landrun.sh`** development shim, which
+runs the build unsandboxed and is convenient for iterating on the Challenge/Solution
+files. Once they passed, real **`landrun`** was built from source at
+**`~/tools/landrun/landrun`** (Landlock LSM sandbox, v0.1.15, from `main`) and **all four
+targets were re-validated with real sandboxing — all four pass.** `fake-landrun.sh`
+therefore remains only a fallback/dev shim (e.g. for hosts without Landlock); it is no
+longer required for this project.
+
 All four triples have been validated under **both** sandbox back-ends, with identical
 `Your solution is okay!` results:
 
