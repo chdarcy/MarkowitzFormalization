@@ -4,7 +4,8 @@ Four headline theorems of this project are independently validated with the
 [Lean FRO Comparator](https://github.com/leanprover/comparator). The Comparator
 re-elaborates a *Mathlib-only* statement of each theorem and checks, with the Lean
 kernel, that a delegating proof against the full library closes exactly that statement
-using only a permitted set of axioms. All four currently report:
+using only a permitted set of axioms. All four pass under **both** the real Landlock
+sandbox (`landrun`) and the insecure `fake-landrun.sh` development shim, each reporting:
 
 ```
 Your solution is okay!
@@ -117,7 +118,7 @@ the project (`~/MarkowitzFormalization`):
 ```bash
 export PATH="$HOME/.elan/bin:$PATH"
 export COMPARATOR_LEAN4EXPORT="$HOME/tools/lean4export/.lake/build/bin/lean4export"
-export COMPARATOR_LANDRUN="$HOME/tools/comparator/scripts/fake-landrun.sh"
+export COMPARATOR_LANDRUN="$HOME/tools/landrun/landrun"   # real Landlock sandbox; see §4
 CMP="$HOME/tools/comparator/.lake/build/bin/comparator"
 
 # Build the triples in the Linux copy first:
@@ -136,19 +137,33 @@ lake env "$CMP" Audit/FrontierVariance/comparator.json
 Each prints `Lean default kernel accepts the solution` / `Your solution is okay!` and
 exits 0.
 
-## 4. `fake-landrun` caveat
+## 4. Sandboxing: real `landrun` and the `fake-landrun` fallback
 
-The runs above use `scripts/fake-landrun.sh`, an **insecure** development shim shipped
-with the Comparator that runs the Solution build **unsandboxed** (it prints
-`WARNING: THIS IS NOT REAL LANDRUN!`). This is acceptable here because the Challenge and
-Solution are both authored by us: the sandbox only protects the checker host from a
-*malicious untrusted* Solution, and the validity of the result (identical exported
-statements + kernel acceptance + axiom check) does not depend on sandboxing.
+All four triples have been validated under **both** sandbox back-ends, with identical
+`Your solution is okay!` results:
 
-For an adversarial or official submission, replace it with the real
-[`landrun`](https://github.com/Zouuup/landrun) Linux sandbox and point
-`COMPARATOR_LANDRUN` at it, optionally wrapping the run in the Comparator README's
-`systemd-run --property=RestrictAddressFamilies=~AF_UNIX --user …` guard.
+- **Real [`landrun`](https://github.com/Zouuup/landrun)** (Landlock LSM sandbox,
+  v0.1.15, built from `main`) — the secure, hardened path. `COMPARATOR_LANDRUN` points at
+  the real binary; Comparator runs each sandboxed build/export with
+  `landrun --best-effort --ro / --rw /dev --ldd --add-exec …`. The WSL2 kernel
+  (`6.6.x-microsoft-standard-WSL2`) has `CONFIG_SECURITY_LANDLOCK=y` and exposes Landlock
+  ABI v3, which covers the filesystem restrictions Comparator requests. Comparator does
+  **not** request TCP restrictions, so the ABI v4 network feature (kernel ≥ 6.7) is not
+  needed. A standalone check confirms the sandbox actually enforces: a sandboxed read of
+  a read-only path succeeds while a write to it is denied (`Permission denied`).
+
+- **`scripts/fake-landrun.sh`** — an **insecure** development shim that runs the build
+  **unsandboxed** (it prints `WARNING: THIS IS NOT REAL LANDRUN!`). It is kept only as a
+  fallback for hosts without Landlock (e.g. macOS). It is acceptable for *self-authored*
+  Challenge+Solution pairs because the validity of the result (identical exported
+  statements + kernel acceptance + axiom check) does not depend on sandboxing — the
+  sandbox only protects the checker host from a *malicious untrusted* Solution.
+
+Because the Solution here is self-authored and the real sandbox passes, no fallback is
+required for this project. For an adversarial or official third-party submission, also
+wrap the run in the Comparator README's guard against the landrun AF_UNIX vulnerability
+(fixed in Linux 7.1):
+`systemd-run --property=RestrictAddressFamilies=~AF_UNIX --user … -- bash -c 'lake env "$CMP" …'`.
 
 ## 5. WSL setup (one-time)
 
@@ -170,6 +185,13 @@ checkout uses v4.32.0-rc1. These coexist in separate checkouts.
    export format matches the project's oleans — the bundled v4.32 export must not be used
    on v4.31.0 oleans), then `lake build` → binary at
    `~/tools/lean4export/.lake/build/bin/lean4export`. This is `COMPARATOR_LEAN4EXPORT`.
+6. **landrun (real sandbox):** install Go (`apt-get install golang-go`, ≥ 1.18), clone
+   `github.com/Zouuup/landrun` → `~/tools/landrun`, build from the `main` branch with
+   `go build -o landrun cmd/landrun/main.go` → binary at `~/tools/landrun/landrun`
+   (v0.1.15). This is `COMPARATOR_LANDRUN`. Requires a Linux kernel ≥ 5.13 with
+   `CONFIG_SECURITY_LANDLOCK=y` (kernel ≥ 6.7 only if TCP restrictions are needed, which
+   Comparator does not request). The `fake-landrun.sh` shim at
+   `~/tools/comparator/scripts/fake-landrun.sh` remains as a no-Landlock fallback.
 
 After the one-time setup, re-validating after editing the triples is just: sync the
 changed `Audit/<Target>` source files into `~/MarkowitzFormalization/Audit/`, then run
