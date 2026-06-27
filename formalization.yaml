@@ -6,7 +6,7 @@ project:
   authors:
     - "Christopher Darcy"
   repository: "MarkowitzFormalization"
-  license: "not specified"
+  license: "Apache-2.0"
   scope_summary: >-
     A Lean 4 / Mathlib formalization of the deterministic mean-vector / covariance-matrix
     layer of Markowitz portfolio optimization. The project assumes a finite universe of
