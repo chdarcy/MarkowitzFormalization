@@ -1,0 +1,7 @@
+{
+    "challenge_module": "Audit.FrontierVariance.Challenge",
+    "solution_module": "Audit.FrontierVariance.Solution",
+    "theorem_names": ["MarkowitzFormalization.StatementAudit.frontierPortfolio_variance_closed_form_of_market"],
+    "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+    "enable_nanoda": false
+}

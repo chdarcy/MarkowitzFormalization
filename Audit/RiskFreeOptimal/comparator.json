@@ -1,0 +1,7 @@
+{
+    "challenge_module": "Audit.RiskFreeOptimal.Challenge",
+    "solution_module": "Audit.RiskFreeOptimal.Solution",
+    "theorem_names": ["MarkowitzFormalization.StatementAudit.rfFrontierPortfolio_optimal"],
+    "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+    "enable_nanoda": false
+}

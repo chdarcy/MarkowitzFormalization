@@ -1,0 +1,7 @@
+{
+    "challenge_module": "Audit.OneFundSeparation.Challenge",
+    "solution_module": "Audit.OneFundSeparation.Solution",
+    "theorem_names": ["MarkowitzFormalization.StatementAudit.rfFrontierPortfolio_one_fund"],
+    "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+    "enable_nanoda": false
+}

@@ -13,8 +13,14 @@ project:
     risky assets, a given expected-return vector μ, and a positive-definite covariance
     matrix Σ. It formalizes the risky-asset frontier, optimality, uniqueness, the frontier
     variance equation, the global minimum variance portfolio, the efficient frontier, and
-    two-fund separation. The probabilistic construction of μ and Σ from random variables
-    is treated as an upstream modelling layer and is not formalized in this project.
+    two-fund separation. It additionally formalizes the risk-free extension (implicit
+    cash-weight model): the squared Sharpe ratio, the risk-free frontier portfolio with its
+    constraint satisfaction, variance closed form, optimality and uniqueness, the squared
+    capital market line, the tangency portfolio, and one-fund separation. The probabilistic
+    construction of μ and Σ from random variables is treated as an upstream modelling layer
+    and is not formalized in this project. A subset of headline theorems is additionally
+    validated against the Lean FRO Comparator via the audit triples in Audit/ (see
+    COMPARATOR.md).
 
 sources:
   - title: "Markowitz lecture notes"
@@ -44,15 +50,20 @@ sources:
 
 status:
   scope: >-
-    The non-risk-free Markowitz theory is formalized end-to-end at the algebraic
-    mean-vector/covariance-matrix level. The development covers the risky-asset budget
+    The Markowitz theory is formalized end-to-end at the algebraic
+    mean-vector/covariance-matrix level. The risky-asset development covers the budget
     constraint, expected return, variance and risk, covariance positive definiteness,
     Markowitz feasibility and optimality, uniqueness of the optimizer, the closed-form
     frontier portfolio, the frontier variance equation in closed and completed-square
     forms, the global minimum variance portfolio, Pareto efficiency of the upper branch,
-    inefficiency of the lower branch, and two-fund separation.
+    inefficiency of the lower branch, and two-fund separation. The risk-free development
+    (implicit cash-weight model) covers the excess-return vector, squared Sharpe ratio and
+    its positivity, the risk-free frontier portfolio, its constraint satisfaction, variance
+    closed form, optimality and uniqueness, the squared capital market line, the tangency
+    portfolio (budget normalisation, zero cash weight, expected/total return), and one-fund
+    separation.
   build_status: "clean"
-  build_jobs: 2601
+  build_jobs: 2602
   sorry_count: 0
   admit_count: 0
   custom_axioms: []
@@ -68,8 +79,9 @@ status:
       It does not construct these objects from random variables, expectations, covariance,
       or measure-theoretic probability spaces.
     - >-
-      Risk-free asset results, capital market line, tangency portfolio optimality,
-      one-fund separation, and CAPM/security-market-line statements are not yet formalized.
+      CAPM and the security-market-line (beta-pricing) statements are not yet formalized.
+      The risk-free asset, squared capital market line, tangency portfolio, and one-fund
+      separation ARE now formalized (see MarkowitzFormalization/RiskFree.lean).
     - >-
       The hyperbola rearrangement in the (σ, m) plane is not formalized; this is treated as
       cosmetic because the variance parabola and completed-square form are proved directly.
@@ -134,6 +146,42 @@ status:
       file: "MarkowitzFormalization/Frontier.lean"
       sorry_count: 0
       description: "Frontier portfolios at or above the GMVP return are Pareto efficient."
+    - declaration: "sharpeSquared_pos"
+      file: "MarkowitzFormalization/RiskFree.lean"
+      sorry_count: 0
+      description: "The squared Sharpe ratio eᵀΣ⁻¹e is strictly positive when the excess-return vector is nonzero."
+    - declaration: "rfFrontierPortfolio_totalExpectedReturn"
+      file: "MarkowitzFormalization/RiskFree.lean"
+      sorry_count: 0
+      description: "The risk-free frontier portfolio attains its target total expected return m."
+    - declaration: "rfFrontierPortfolio_variance"
+      file: "MarkowitzFormalization/RiskFree.lean"
+      sorry_count: 0
+      description: "The risk-free frontier portfolio has variance (m - rf)² / (eᵀΣ⁻¹e)."
+    - declaration: "rfFrontierPortfolio_optimal"
+      file: "MarkowitzFormalization/RiskFree.lean"
+      sorry_count: 0
+      description: "Among risky exposure vectors attaining total return m, the risk-free frontier portfolio minimizes variance."
+    - declaration: "rfFrontierPortfolio_unique"
+      file: "MarkowitzFormalization/RiskFree.lean"
+      sorry_count: 0
+      description: "The minimal-variance risky exposure attaining total return m is unique and equals the risk-free frontier portfolio."
+    - declaration: "capitalMarketLine_squared"
+      file: "MarkowitzFormalization/RiskFree.lean"
+      sorry_count: 0
+      description: "Squared capital market line: σ²·(eᵀΣ⁻¹e) = (m - rf)²."
+    - declaration: "tangencyPortfolio_budget"
+      file: "MarkowitzFormalization/RiskFree.lean"
+      sorry_count: 0
+      description: "When the tangency denominator is nonzero the tangency portfolio is fully invested (risky weights sum to 1)."
+    - declaration: "tangencyPortfolio_totalExpectedReturn"
+      file: "MarkowitzFormalization/RiskFree.lean"
+      sorry_count: 0
+      description: "The tangency portfolio has total expected return rf + S/D."
+    - declaration: "rfFrontierPortfolio_one_fund"
+      file: "MarkowitzFormalization/RiskFree.lean"
+      sorry_count: 0
+      description: "One-fund separation: every risk-free frontier portfolio is a scalar multiple of the single tangency portfolio."
 
 files:
   - path: "MarkowitzFormalization/Basic.lean"
@@ -143,7 +191,9 @@ files:
   - path: "MarkowitzFormalization/Frontier.lean"
     role: "risky-asset Markowitz frontier, optimality, uniqueness, GMVP, efficient frontier, two-fund separation"
   - path: "MarkowitzFormalization/RiskFree.lean"
-    role: "planned risk-free extension; not part of the completed risky-asset core unless added later"
+    role: "completed risk-free extension: excess return, squared Sharpe ratio, risk-free frontier portfolio (constraint satisfaction, variance, optimality, uniqueness), squared capital market line, tangency portfolio, one-fund separation"
+  - path: "Audit/"
+    role: "Lean FRO Comparator audit triples (Challenge/Solution/comparator.json) validating headline theorems; not in defaultTargets. See COMPARATOR.md and CORRESPONDENCE.md."
 
 automation:
   methods:
@@ -195,9 +245,9 @@ fidelity:
     directly in Lean.
   divergences: >-
     The formalization does not derive expected returns or covariances from random variables.
-    It does not yet include the risk-free asset, Sharpe ratio, capital market line,
-    tangency portfolio, one-fund separation, or CAPM. These are future extensions rather
-    than failures of the current risky-asset formalization.
+    The risk-free asset, squared Sharpe ratio, squared capital market line, tangency
+    portfolio, and one-fund separation are now formalized. CAPM and the security-market-line
+    (beta pricing) remain future extensions rather than failures of the current formalization.
   statement_style: >-
     Theorems are stated over an arbitrary finite asset type n with Fintype and DecidableEq
     assumptions where needed. Positive definiteness is encoded through Mathlib's matrix
@@ -212,8 +262,11 @@ review:
     - "Claude Code build and declaration inventory checks"
   notes: >-
     The source was repeatedly audited by running lean_build and checking theorem inventories.
-    The final risky-asset core has no sorry/admit/stop and a clean build apart from cosmetic
-    style diagnostics. This is not external peer review.
+    The final development (risky-asset core plus risk-free extension) has no sorry/admit/stop
+    and a clean build apart from cosmetic style diagnostics. Four headline theorems are
+    additionally validated against the Lean FRO Comparator (independent re-elaboration of a
+    Mathlib-only statement plus kernel acceptance of the delegating proof); all four report
+    "Your solution is okay!" See COMPARATOR.md. This is not external peer review.
 
 alignment:
   namespace: "MarkowitzFormalization"
@@ -253,6 +306,26 @@ alignment:
       module: "MarkowitzFormalization.Frontier"
       status: "proved"
       note: "Any frontier portfolio is an affine combination of any two distinct frontier portfolios."
+    - source: "Risk-free frontier optimality"
+      lean: "rfFrontierPortfolio_optimal"
+      module: "MarkowitzFormalization.RiskFree"
+      status: "proved"
+      note: "Comparator-validated (Audit/RiskFreeOptimal). Min-variance risky exposure at fixed total return m."
+    - source: "Squared capital market line"
+      lean: "capitalMarketLine_squared"
+      module: "MarkowitzFormalization.RiskFree"
+      status: "proved"
+      note: "Comparator-validated (Audit/CapitalMarketLine). σ²·(eᵀΣ⁻¹e) = (m - rf)²."
+    - source: "One-fund separation"
+      lean: "rfFrontierPortfolio_one_fund"
+      module: "MarkowitzFormalization.RiskFree"
+      status: "proved"
+      note: "Comparator-validated (Audit/OneFundSeparation). Every risk-free frontier portfolio is a multiple of the tangency portfolio."
+    - source: "Frontier variance parabola (Comparator target)"
+      lean: "frontierPortfolio_variance_closed_form_of_market"
+      module: "MarkowitzFormalization.Frontier"
+      status: "proved"
+      note: "Comparator-validated (Audit/FrontierVariance). σ²(m) = (C m² - 2 A m + B) / D."
 
 acknowledgements: >-
   Built using Lean 4, Mathlib, Lake, Claude Code, and ChatGPT. The mathematical reference
